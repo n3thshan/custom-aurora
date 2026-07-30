@@ -15,7 +15,7 @@ cp -avf "/ctx/system_files"/. /
 # this installs a package from fedora repos
 # dnf5 install -y tmux
 
-dnf5 install plasma-oxygen oxygen-icon-theme -y
+dnf5 install plasma-oxygen oxygen-icon-theme intel-compute-runtime clinfo oneapi-level-zero oneapi-level-zero-zello_world -y
 
 # Use a COPR Example:
 #
@@ -26,4 +26,4 @@ dnf5 install plasma-oxygen oxygen-icon-theme -y
 
 #### Example for enabling a System Unit File
 
-systemctl enable podman.socket
+# systemctl enable podman.socket
