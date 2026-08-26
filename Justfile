@@ -135,8 +135,8 @@ rechunk $target_image=image_name $tag=default_tag:
     # TODO: pin chunkah image to hash once mature enough
     # You may run into space issues on github runenrs as we are making a
     # complete copy of the image
-    CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}")
-    printf '%s\n' "CHUNKAH_CONFIG_STR=${CHUNKAH_CONFIG_STR}" > "${TMPDIR:-/tmp}/chunkah.env"
+    CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}" | tr -d '\n')
+    printf 'CHUNKAH_CONFIG_STR=%s\n' "${CHUNKAH_CONFIG_STR}" > "${TMPDIR:-/tmp}/chunkah.env"
     podman run --rm --mount=type=image,src="${target_image}",target=/chunkah \
     --env-file "${TMPDIR:-/tmp}/chunkah.env" quay.io/coreos/chunkah:latest \
     build \
