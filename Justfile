@@ -132,21 +132,13 @@ rechunk $target_image=image_name $tag=default_tag:
 
     set -xeuo pipefail
 
-    # TODO: pin chunkah image to hash once mature enough
-    # You may run into space issues on github runenrs as we are making a
-    # complete copy of the image
-    CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}" | tr -d '\n')
-    printf 'CHUNKAH_CONFIG_STR=%s\n' "${CHUNKAH_CONFIG_STR}" > "${TMPDIR:-/tmp}/chunkah.env"
-    podman run --rm --mount=type=image,src="${target_image}",target=/chunkah \
-    --env-file "${TMPDIR:-/tmp}/chunkah.env" quay.io/coreos/chunkah:latest \
-    build \
-    --verbose \
-    --compressed \
-    --max-layers 128 \
-    --prune /sysroot/ \
-    --label ostree.commit- --label ostree.final-diffid- \
-    --tag "${target_image}:${tag}" | podman load
-    rm -f "${TMPDIR:-/tmp}/chunkah.env"
+    # Use the Containerfile.splitter approach to avoid env var size limits
+    # https://github.com/coreos/chunkah#splitting-an-existing-image
+    podman build --skip-unused-stages=false \
+      --from "${target_image}" \
+      --build-arg "CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}")" \
+      --tag "${target_image}:${tag}" \
+      https://github.com/coreos/chunkah/releases/download/v0.6.0/Containerfile.splitter
 
 # Split the image for smaller updates (Classical)!
 ostree-rechunk $target_image=image_name $tag=default_tag:
