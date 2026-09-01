@@ -132,13 +132,19 @@ rechunk $target_image=image_name $tag=default_tag:
 
     set -xeuo pipefail
 
-    # Use the Containerfile.splitter approach to avoid env var size limits
-    # https://github.com/coreos/chunkah#splitting-an-existing-image
-    podman build --skip-unused-stages=false \
-      --from "${target_image}" \
-      --build-arg "CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}")" \
-      --tag "${target_image}:${tag}" \
-      https://github.com/coreos/chunkah/releases/download/v0.6.0/Containerfile.splitter
+    # TODO: pin chunkah image to hash once mature enough
+    # You may run into space issues on github runenrs as we are making a
+    # complete copy of the image
+    export CHUNKAH_CONFIG_STR=$(podman inspect "${target_image}")
+    podman run --rm --mount=type=image,src="${target_image}",target=/chunkah \
+    -e CHUNKAH_CONFIG_STR quay.io/coreos/chunkah:latest \
+    build \
+    --verbose \
+    --compressed \
+    --max-layers 128 \
+    --prune /sysroot/ \
+    --label ostree.commit- --label ostree.final-diffid- \
+    --tag "${target_image}:${tag}" | podman load
 
 # Split the image for smaller updates (Classical)!
 ostree-rechunk $target_image=image_name $tag=default_tag:
