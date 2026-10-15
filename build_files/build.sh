@@ -15,7 +15,7 @@ cp -avf "/ctx/system_files"/. /
 # this installs a package from fedora repos
 # dnf5 install -y tmux
 
-dnf5 install plasma-oxygen oxygen-icon-theme intel-compute-runtime clinfo oneapi-level-zero oneapi-level-zero-zello_world -y
+dnf5 install -y libcamera-v4l2
 
 # Use a COPR Example:
 #
